@@ -77,7 +77,9 @@ int milli_vel_error_sum = 0;
 
 
 void poweroff() {
-    if (abs(speed) < 20) {
+      setScopeChannel(7, 33);  // 8: for verifying board temperature calibration
+      consoleScope();
+//    if (ABS(speed) < 200) {
         buzzerPattern = 0;
         enable = 0;
         for (int i = 0; i < 8; i++) {
@@ -86,7 +88,7 @@ void poweroff() {
         }
         HAL_GPIO_WritePin(OFF_PORT, OFF_PIN, 0);
         while(1) {}
-    }
+//    }
 }
 
 
@@ -205,8 +207,8 @@ int main(void) {
       cmd2 = CLAMP(adc_buffer.l_rx2 - ADC2_MIN, 0, ADC2_MAX) / (ADC2_MAX / 1000.0f);  // ADC2
 
       // use ADCs as button inputs:
-      button1 = (uint8_t)(adc_buffer.l_tx2 > 2000);  // ADC1
-      button2 = (uint8_t)(adc_buffer.l_rx2 > 2000);  // ADC2
+      button1 = (uint8_t)(adc_buffer.l_tx2 > 4000);  // ADC1
+      button2 = (uint8_t)(adc_buffer.l_rx2 > 5555);  // ADC2 it implies the value to be never reachable
 
       timeout = 0;
     #endif
@@ -221,12 +223,14 @@ int main(void) {
 
     // ####### LOW-PASS FILTER #######
     steer = steer * (1.0 - FILTER) + cmd1 * FILTER;
-    speed = speed * (1.0 - FILTER) + cmd2 * FILTER;
+//    speed = speed * (1.0 - FILTER) + cmd2 * FILTER;
+    speed = CLAMP(speed * (1.0 - FILTER) + cmd1 * FILTER, 0, 1000);
 
 
     // ####### MIXER #######
     speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000);
     speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000);
+    speedR = speedL;
 
 
     #ifdef ADDITIONAL_CODE
@@ -264,16 +268,19 @@ int main(void) {
       #endif
       setScopeChannel(2, (int)speedR);  // 3: output speed: 0-1000
       setScopeChannel(3, (int)speedL);  // 4: output speed: 0-1000
-      setScopeChannel(4, (int)adc_buffer.batt1);  // 5: for battery voltage calibration
+//      setScopeChannel(4, (int)adc_buffer.batt1);  // 5: for battery voltage calibration
+      setScopeChannel(4, (int)0);  // 5: for battery voltage calibration
       setScopeChannel(5, (int)(batteryVoltage * 100.0f));  // 6: for verifying battery voltage calibration
       setScopeChannel(6, (int)board_temp_adc_filtered);  // 7: for board temperature calibration
-      setScopeChannel(7, (int)board_temp_deg_c);  // 8: for verifying board temperature calibration
+//      setScopeChannel(7, (int)board_temp_deg_c);  // 8: for verifying board temperature calibration
       consoleScope();
     }
 
 
     // ####### POWEROFF BY POWER-BUTTON #######
-    if (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) && weakr == 0 && weakl == 0) {
+    if (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN)) { // && weakr == 0 && weakl == 0) {
+      setScopeChannel(7, 32);  // 8: for verifying board temperature calibration
+      consoleScope();
       enable = 0;
       while (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN)) {}
       poweroff();
@@ -282,6 +289,8 @@ int main(void) {
 
     // ####### BEEP AND EMERGENCY POWEROFF #######
     if ((TEMP_POWEROFF_ENABLE && board_temp_deg_c >= TEMP_POWEROFF && abs(speed) < 20) || (batteryVoltage < ((float)BAT_LOW_DEAD * (float)BAT_NUMBER_OF_CELLS) && abs(speed) < 20)) {  // poweroff before mainboard burns OR low bat 3
+      setScopeChannel(7, (int)batteryVoltage);  // 8: for verifying board temperature calibration
+
       poweroff();
     } else if (TEMP_WARNING_ENABLE && board_temp_deg_c >= TEMP_WARNING) {  // beep if mainboard gets hot
       buzzerFreq = 4;
@@ -308,6 +317,7 @@ int main(void) {
       inactivity_timeout_counter ++;
     }
     if (inactivity_timeout_counter > (INACTIVITY_TIMEOUT * 60 * 1000) / (DELAY_IN_MAIN_LOOP + 1)) {  // rest of main loop needs maybe 1ms
+
       poweroff();
     }
   }

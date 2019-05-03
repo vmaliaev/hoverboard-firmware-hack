@@ -8,18 +8,18 @@
 
 #define DELAY_IN_MAIN_LOOP 5        // in ms. default 5. it is independent of all the timing critical stuff. do not touch if you do not know what you are doing.
 
-#define TIMEOUT          5          // number of wrong / missing input commands before emergency off
+#define TIMEOUT          6          // number of wrong / missing input commands before emergency off
 
 // ############################### GENERAL ###############################
 
 // How to calibrate: connect GND and RX of a 3.3v uart-usb adapter to the right sensor board cable (be careful not to use the red wire of the cable. 15v will destroye verything.). if you are using nunchuck, disable it temporarily. enable DEBUG_SERIAL_USART3 and DEBUG_SERIAL_ASCII use asearial terminal.
 
 // Battery voltage calibration: connect power source. see <How to calibrate>. write value nr 5 to BAT_CALIB_ADC. make and flash firmware. then you can verify voltage on value 6 (devide it by 100.0 to get calibrated voltage).
-#define BAT_CALIB_REAL_VOLTAGE        43.0       // input voltage measured by multimeter  
-#define BAT_CALIB_ADC                 1704       // adc-value measured by mainboard (value nr 5 on UART debug output)
+#define BAT_CALIB_REAL_VOLTAGE        26.0       // input voltage measured by multimeter  
+#define BAT_CALIB_ADC                 1049       // adc-value measured by mainboard (value nr 5 on UART debug output)
 
-#define BAT_NUMBER_OF_CELLS     10        // normal Hoverboard battery: 10s
-#define BAT_LOW_LVL1_ENABLE     0         // to beep or not to beep, 1 or 0
+#define BAT_NUMBER_OF_CELLS     7         // normal Hoverboard battery: 10s
+#define BAT_LOW_LVL1_ENABLE     1         // to beep or not to beep, 1 or 0
 #define BAT_LOW_LVL1            3.6       // gently beeps at this voltage level. [V/cell]
 #define BAT_LOW_LVL2_ENABLE     1         // to beep or not to beep, 1 or 0
 #define BAT_LOW_LVL2            3.5       // your battery is almost empty. Charge now! [V/cell]
@@ -84,15 +84,15 @@
 // - speedR and speedL: normal driving -1000 to 1000
 // - weakr and weakl: field weakening for extra boost at high speed (speedR > 700 and speedL > 700). 0 to ~400
 
-#define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
-#define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?
-#define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
+#define FILTER              0.05 // lower value == softer filter. do not use values <0.01, you will get float precision issues.
+#define SPEED_COEFFICIENT   1.0  // higher value == stronger. 0.0 to ~2.0?
+#define STEER_COEFFICIENT   0.0  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
 #define INVERT_R_DIRECTION
 #define INVERT_L_DIRECTION
 #define BEEPS_BACKWARD 1    // 0 or 1
 
 //Turbo boost at high speeds while button1 is pressed:
-//#define ADDITIONAL_CODE \
+#define ADDITIONAL_CODE \
 if (button1 && speedR > 700) { /* field weakening at high speeds */ \
   weakl = cmd1 - 700; /* weak should never exceed 400 or 450 MAX!! */ \
   weakr = cmd1 - 700; } \
