@@ -48,7 +48,7 @@ typedef struct{
 
 volatile Serialcommand command;
 
-uint8_t button1, button2;
+uint8_t button1, button2, eco_button;
 
 int steer; // global variable for steering. -1000 to 1000
 int speed; // global variable for speed. -1000 to 1000
@@ -209,6 +209,7 @@ int main(void) {
       // use ADCs as button inputs:
       button1 = (uint8_t)(adc_buffer.l_tx2 > 4000);  // ADC1
       button2 = (uint8_t)(adc_buffer.l_rx2 > 5555);  // ADC2 it implies the value to be never reachable
+      eco_button = (adc_buffer.l_rx2 > 1000)? 1 : 0; // Switch ADC2 to binary logic for eco_button 
 
       timeout = 0;
     #endif
@@ -269,7 +270,7 @@ int main(void) {
       setScopeChannel(2, (int)speedR);  // 3: output speed: 0-1000
       setScopeChannel(3, (int)speedL);  // 4: output speed: 0-1000
 //      setScopeChannel(4, (int)adc_buffer.batt1);  // 5: for battery voltage calibration
-      setScopeChannel(4, (int)cmd1);  // 5: for battery voltage calibration
+      setScopeChannel(4, eco_button);  // 5: for battery voltage calibration
       setScopeChannel(5, (int)(batteryVoltage * 100.0f));  // 6: for verifying battery voltage calibration
       setScopeChannel(6, (int)board_temp_adc_filtered);  // 7: for board temperature calibration
 //      setScopeChannel(7, (int)board_temp_deg_c);  // 8: for verifying board temperature calibration
