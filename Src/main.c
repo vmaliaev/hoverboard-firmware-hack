@@ -77,8 +77,8 @@ int milli_vel_error_sum = 0;
 
 
 void poweroff() {
-      setScopeChannel(7, 33);  // 8: for verifying board temperature calibration
-      consoleScope();
+//      setScopeChannel(7, 33);  // 8: for verifying board temperature calibration
+//      consoleScope();
 //    if (ABS(speed) < 200) {
         buzzerPattern = 0;
         enable = 0;
@@ -203,7 +203,7 @@ int main(void) {
 
     #ifdef CONTROL_ADC
       // ADC values range: 0-4095, see ADC-calibration in config.h
-      cmd1 = CLAMP(adc_buffer.l_tx2 - ADC1_MIN, 0, ADC1_MAX) / (ADC1_MAX / 1000.0f);  // ADC1
+      cmd1 = CLAMP(adc_buffer.l_tx2 - ADC1_MIN, 0, ADC1_MAX) / ((ADC1_MAX - ADC1_MIN) / 1000.0f);  // ADC1
       cmd2 = CLAMP(adc_buffer.l_rx2 - ADC2_MIN, 0, ADC2_MAX) / (ADC2_MAX / 1000.0f);  // ADC2
 
       // use ADCs as button inputs:
@@ -269,7 +269,7 @@ int main(void) {
       setScopeChannel(2, (int)speedR);  // 3: output speed: 0-1000
       setScopeChannel(3, (int)speedL);  // 4: output speed: 0-1000
 //      setScopeChannel(4, (int)adc_buffer.batt1);  // 5: for battery voltage calibration
-      setScopeChannel(4, (int)0);  // 5: for battery voltage calibration
+      setScopeChannel(4, (int)cmd1);  // 5: for battery voltage calibration
       setScopeChannel(5, (int)(batteryVoltage * 100.0f));  // 6: for verifying battery voltage calibration
       setScopeChannel(6, (int)board_temp_adc_filtered);  // 7: for board temperature calibration
 //      setScopeChannel(7, (int)board_temp_deg_c);  // 8: for verifying board temperature calibration
